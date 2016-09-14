@@ -32,7 +32,7 @@ __command__ is one of:
 * __shell__ executes interactive shell (__bash__) in the container
 
 # How do I choose the guest OS?
-There are 2 ways. Either you provide ENVOS with every command to make, like ```make start OSVER=1604``` or export an environment variable ENVOS with some value and then call make without a variable. ```export ENVOS=14.04; make container```
+There are 2 ways. Either you provide __OSVER__ with every command to run, like ```make start OSVER=1604``` or export an environment variable __ENVOS__ with some value and then call make without a variable. ```export ENVOS=14.04; make container```
 
 # Sample session
 ```andrey@poohie:/work/3306-builder$ make bootstrap_download TAR_MAJOR_MINOR=5.7 TAR_PATCH=15 BOOST_VERSION=59
