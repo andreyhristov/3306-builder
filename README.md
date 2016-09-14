@@ -35,7 +35,8 @@ __command__ is one of:
 There are 2 ways. Either you provide __OSVER__ with every command to run, like ```make start OSVER=1604``` or export an environment variable __ENVOS__ with some value and then call make without a variable. ```export ENVOS=14.04; make container```
 
 # Sample session
-```andrey@poohie:/work/3306-builder$ make bootstrap_download TAR_MAJOR_MINOR=5.7 TAR_PATCH=15 BOOST_VERSION=59
+```
+andrey@host:/work/3306-builder$ make bootstrap_download TAR_MAJOR_MINOR=5.7 TAR_PATCH=15 BOOST_VERSION=59
 cd src && \
         wget -c http://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.15.tar.gz && \
         rm server ; \
@@ -118,7 +119,7 @@ find: './CMakeFiles': No such file or directory
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/developer/build
-andrey@poohie:/work/git-mysql/3306-builder$ make compile CPUS=6
+andrey@host:/work/git-mysql/3306-builder$ make compile CPUS=6
 docker exec --user developer compiler1604 sh -c "cd /home/developer/build/ && make -j6"
 Scanning dependencies of target abi_check
 Scanning dependencies of target INFO_BIN
