@@ -1,6 +1,6 @@
 # 3306-builder
 
-## What is 3306-builder
+## What is 3306-builder?
 
 3306-builder is a system for building MySQL (from source tarball or git clone) in a container. This means that you don't need to pollute your host system with libraries and compilers just to be able to compile MySQL from source.
 
