@@ -1,0 +1,30 @@
+FROM ubuntu:16.04
+MAINTAINER Andrey Hristov <andrey@php.net>
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    ccache \
+    build-essential \
+    libssl-dev \
+    libncurses5-dev \
+    bison \
+    cmake \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+
+RUN useradd -ms /bin/bash -G root developer
+
+#COPY provision_boost.sh /home/developer
+#RUN chmod a+x /home/developer/provision_boost.sh
+#RUN cd /home/developer && \
+#   ./provision_boost.sh && \
+RUN mkdir /home/developer/ccache && \
+	mkdir /home/developer/boost && \
+    chown -R developer.developer /home/developer
+
+ENV CCACHE_DIR /home/developer/ccache
+
+WORKDIR /home/developer
+
+CMD ["sleep", "1000"]

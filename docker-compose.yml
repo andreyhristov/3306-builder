@@ -1,0 +1,12 @@
+version: '2'
+services:
+
+    #this instance name will be used in the Makefile
+    compiler:
+        image: dev-mysql
+        container_name: dev-mysql
+        volumes:
+            - "./src:/home/developer/src"
+            - "./build:/home/developer/build"
+            - "./ccache:/home/developer/ccache"
+            - "./boost:/home/developer/boost"
