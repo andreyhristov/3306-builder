@@ -131,4 +131,17 @@ Scanning dependencies of target zlib
 [  0%] Built target INFO_SRC
 [  1%] Generating help.h
 ...
+[100%] Linking CXX shared module udf_example.so
+[100%] Built target udf_example
+andrey@host:/work/3306-builder$ make test
+docker exec --user developer compiler1604 sh -c "cd /home/developer/build/ && cd mysql-test && ./mtr"
+Logging: /home/developer/src/server/mysql-test/mysql-test-run.pl  
+MySQL Version 5.7.15
+Checking supported features...
+ - SSL connections supported
+ - binaries are debug compiled
+Using suites: main,sys_vars,binlog,federated,gis,rpl,innodb,innodb_gis,innodb_fts,innodb_zip,innodb_undo,perfschema,funcs_1,opt_trace,parts,auth_sec,query_rewrite_plugins,gcol,sysschema,test_service_sql_api,json
+Collecting tests...
+ - adding combinations for binlog
+ ...
 ```
