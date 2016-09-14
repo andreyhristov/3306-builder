@@ -27,4 +27,4 @@ ENV CCACHE_DIR /home/developer/ccache
 
 WORKDIR /home/developer
 
-CMD ["sleep", "1000"]
+CMD ["sleep", "10000000"]

@@ -1,4 +1,11 @@
+ifneq ($(ENVOS),)
+  OSVER=$(ENVOS)
+else
+  OSVER=1604
+endif
+
 BOOST_VERSION=60
+
 BST_DOT_VER=1.$(BOOST_VERSION).0
 BST_DASH_VER=1_$(BOOST_VERSION)_0
 BST_DOWNLOAD_CMD=cd /home/developer/boost && \
@@ -11,7 +18,7 @@ MYSQL_SOURCE_LOCATION=src
 CMAKE_CMD=find -name CMakeCache.txt -delete ; \
 	  find -name CMakeFiles -exec rm -rf {} \; ; \
 	  \
-	  CC='' CXX='ccache g++' cmake /home/developer/$(MYSQL_SOURCE_LOCATION)/mysql-server \
+	  CC='' CXX='ccache g++' cmake /home/developer/$(MYSQL_SOURCE_LOCATION)/server \
 	  -DWITH_SSL:STRING=system \
 	  -DMYSQL_MAINTAINER_MODE:BOOL=OFF \
 	  -DWITH_DEBUG:BOOL=ON \
@@ -21,68 +28,81 @@ CMAKE_CMD=find -name CMakeCache.txt -delete ; \
 TAR_MAJOR_MINOR=8.0
 TAR_PATCH=0-dmr
 TAR_PREFIX=$(TAR_MAJOR_MINOR).$(TAR_PATCH)
+TAR_DIR=mysql-$(TAR_PREFIX)
 TAR_EXTENSION=.tar.gz
 TAR_FILE=mysql-$(TAR_PREFIX)$(TAR_EXTENSION)
 
 
 #see docker-compose.yml
-DC_INSTANCE_NAME=compiler
+DC_INSTANCE_NAME_PREFIX=compiler
+DC_INSTANCE_NAME=$(DC_INSTANCE_NAME_PREFIX)$(OSVER)
 
+DOCKER_BUILD_TAG_PREFIX=3306-builder-
+DOCKER_BUILD_TAG=$(DOCKER_BUILD_TAG_PREFIX)$(OSVER)
+
+
+GIT_REMOTE_ORIGIN=https://github.com/mysql/mysql-server.git
 
 CPUS=4
 
-
 compile:
-	docker-compose exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build && make -j$(CPUS)"
+	docker exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build/ && make -j$(CPUS)"
 
-download_boost:
-	docker-compose exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer && $(BST_DOWNLOAD_CMD)"
+test:
+	docker exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build/ && cd mysql-test && ./mtr"
+	
+
+boost:
+	docker exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer && $(BST_DOWNLOAD_CMD)"
 
 cmake:
-	docker-compose exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build && $(CMAKE_CMD)"
-
+	docker exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build/ && $(CMAKE_CMD)"
 
 clean:
-	docker-compose exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build && make clean"
+	docker exec --user developer $(DC_INSTANCE_NAME) sh -c "cd /home/developer/build && make clean"
 
 ccache_clean:
-	docker-compose exec --user developer $(DC_INSTANCE_NAME) sh -c "ccache -C"
+	docker exec --user developer $(DC_INSTANCE_NAME) sh -c "ccache -C"
 	
 download:
 	cd $(MYSQL_SOURCE_LOCATION) && \
 	wget -c http://dev.mysql.com/get/Downloads/MySQL-$(TAR_MAJOR_MINOR)/$(TAR_FILE) && \
-	rm -rf mysql-server && \
+	rm server ; \
 	tar zxvf $(TAR_FILE) && \
-	mv $(TAR_PREFIX) mysql-server && \
+	ln -s $(TAR_DIR) server && \
 	rm $(TAR_FILE)
 
 clone_git:
-	git clone https://github.com/mysql/mysql-server.git && \
+	git clone $(GIT_REMOTE_ORIGIN) && \
 	mv mysql-server src/vanilla && \
 	cd src && \
+	ln -s vanilla server
 	bash /usr/share/doc/git/contrib/workdir/git-new-workdir vanilla ./mysql-8.0 8.0 && \
 	bash /usr/share/doc/git/contrib/workdir/git-new-workdir vanilla ./mysql-5.7 5.7 && \
 	bash /usr/share/doc/git/contrib/workdir/git-new-workdir vanilla ./mysql-5.6 5.6
 
-up:
-	docker-compose up -d
+container:
+	echo "Building Docker image"
+	docker build -f Dockerfile.$(OSVER) . -t $(DOCKER_BUILD_TAG)
 
-kill:
-	docker-compose kill
-	docker-compose rm --force
+bootstrap_download: download container start boost cmake
+
+bootstrap_git: clone_git container start boost cmake
+
+start:
+	@mkdir builddir/$(OSVER) ccachedir/$(OSVER); \
+	docker run -d \
+		--env CCACHE_DIR=/home/developer/ccache \
+		-v `pwd`/src:/home/developer/src \
+		-v `pwd`/boostdir:/home/developer/boost \
+		-v `pwd`/builddir/$(OSVER):/home/developer/build \
+		-v `pwd`/ccachedir/$(OSVER):/home/developer/ccache \
+		--name $(DC_INSTANCE_NAME) \
+		$(DOCKER_BUILD_TAG)	
 
 stop:
-	docker-compose stop
-	docker-compose rm --force
+	docker stop $(DC_INSTANCE_NAME)
+	docker rm $(DC_INSTANCE_NAME)
 
-pull:
-	docker-compose pull
-
-ps:
-	docker-compose ps
- 
 shell:
-	docker-compose exec --privileged --user developer $(DC_INSTANCE_NAME) bash
-
-rootshell:
-	docker-compose exec --privileged $(DC_INSTANCE_NAME) bash
+	docker exec -it --privileged --user developer $(DC_INSTANCE_NAME) bash
