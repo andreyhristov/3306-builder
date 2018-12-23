@@ -1,15 +1,15 @@
 ifneq ($(ENVOS),)
   OSVER=$(ENVOS)
 else
-  OSVER=1604
+  OSVER=1804
 endif
 
-BOOST_VERSION=60
+BOOST_VERSION=67
 
 BST_DOT_VER=1.$(BOOST_VERSION).0
 BST_DASH_VER=1_$(BOOST_VERSION)_0
 BST_DOWNLOAD_CMD=cd /home/developer/boost && \
-		 wget -c http://netix.dl.sourceforge.net/project/boost/boost/$(BST_DOT_VER)/boost_$(BST_DASH_VER).tar.bz2 && \
+		 wget -c https://netix.dl.sourceforge.net/project/boost/boost/$(BST_DOT_VER)/boost_$(BST_DASH_VER).tar.bz2 && \
 		 tar jxvf boost_$(BST_DASH_VER).tar.bz2 && \
 		 rm boost_$(BST_DASH_VER).tar.bz2
 
@@ -20,8 +20,9 @@ CMAKE_CMD=find -name CMakeCache.txt -delete ; \
 	  \
 	  CC='' CXX='ccache g++' cmake /home/developer/$(MYSQL_SOURCE_LOCATION)/server \
 	  -DWITH_SSL:STRING=system \
-	  -DMYSQL_MAINTAINER_MODE:BOOL=OFF \
+	  -DMYSQL_MAINTAINER_MODE:BOOL=ON \
 	  -DWITH_DEBUG:BOOL=ON \
+	  -DWITH_VALGRIND:BOOL=ON \
 	  -DWITH_BOOST=/home/developer/boost/boost_1_$(BOOST_VERSION)_0/
 
 #change this to download something else
@@ -66,7 +67,7 @@ ccache_clean:
 	
 download:
 	cd $(MYSQL_SOURCE_LOCATION) && \
-	wget -c http://dev.mysql.com/get/Downloads/MySQL-$(TAR_MAJOR_MINOR)/$(TAR_FILE) && \
+	wget -c https://dev.mysql.com/get/Downloads/MySQL-$(TAR_MAJOR_MINOR)/$(TAR_FILE) && \
 	rm server ; \
 	tar zxvf $(TAR_FILE) && \
 	ln -s $(TAR_DIR) server && \
@@ -74,6 +75,7 @@ download:
 
 clone_git:
 	git clone $(GIT_REMOTE_ORIGIN) && \
+	mkdir src && \
 	mv mysql-server src/vanilla && \
 	cd src && \
 	ln -s vanilla server

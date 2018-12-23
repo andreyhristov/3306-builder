@@ -1,5 +1,4 @@
-FROM ubuntu:14.04
-MAINTAINER Andrey Hristov <andrey@php.net>
+FROM ubuntu:18.04
 
 RUN apt-get update && apt-get install -y \
     wget \
@@ -16,10 +15,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN useradd -ms /bin/bash -G root developer
 
-#COPY provision_boost.sh /home/developer
-#RUN chmod a+x /home/developer/provision_boost.sh
-#RUN cd /home/developer && \
-#   ./provision_boost.sh && \
 RUN mkdir /home/developer/ccache && \
 	mkdir /home/developer/boost && \
     chown -R developer.developer /home/developer
