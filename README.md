@@ -24,11 +24,11 @@ __command__ is one of:
 * __ccache_clean__ cleans the cache of __ccache__. By default 3306-builder uses object file caching utilizing ccache. It does it only for C++ and not for C files (incompatibility). For every target (guest OS) there is a separate cache. This means that if you build in parallel for 14.04 and 16.04 the caches won't be mixed.
 * __download__ downloads a tarball with MySQL source code and unpacks it for later compilation. You have to choose which tarball will be downloaded by supplying variables to the command. For example ```make download TAR_MAJOR_MINOR=5.7 TAR_PATCH=15``` will download MySQL 5.7.16 from http://dev.mysql.com . ```make download TAR_MAJOR_MINOR=8.0 TAR_PATCH=0-dmr``` will download MySQL 8.0.0-DMR. Be advised that versions that are not marked GA typically have a suffix for the patch version. __5.7.15_ has no suffix, but you see __8.0.0__ has __-dmr__ as suffix.
 * __clone_git__ downloads the source from a Git repository. By default this will be https://github.com/mysql/mysql-server.git , however if you export an enviromental variable GIT_REMOTE_ORIGIN with value of other Git server it will be used. Here is an example ```export GIT_REMOTE_ORIGIN=http://example.com/mysql-server/server.git; make clone_git```
-* __container__ builds a Docker container for compiling MySQL in it. In essence it uses Dockerfile.xxx to build one. __xxx__ is 1604 or 1404 (adding a new guest OS is quite easy, as already stated).
+* __container_build__ builds a Docker container for compiling MySQL in it. In essence it uses Dockerfile.xxx to build one. __xxx__ is 1604 or 1404 (adding a new guest OS is quite easy, as already stated).
 * __bootstrap_download__ is a short-cut for __download__-ing source from a tarball (see __download__), building the __container__, then __start__-ing it, downloading __boost__ in the container and as last configuring the build for out-of-source building with __cmake__.
 * __bootstrap_git__ is a short-cut like __bootstrap_download__ but instead of downloading a tarball it does clone from a git repo. Automatically 3 branches are checked out - 5.6, 5.7 and 8.0 . 5.7 will be linked for building.
-* __start__ starts the container
-* __stop__ stops the container
+* __container_start__ starts the container
+* __conteiner_kill__ kills the container and cleans up after it
 * __shell__ executes interactive shell (__bash__) in the container
 
 # How do I choose the guest OS?

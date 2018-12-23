@@ -83,15 +83,15 @@ clone_git:
 	bash /usr/share/doc/git/contrib/workdir/git-new-workdir vanilla ./mysql-5.7 5.7 && \
 	bash /usr/share/doc/git/contrib/workdir/git-new-workdir vanilla ./mysql-5.6 5.6
 
-container:
+container_build:
 	echo "Building Docker image"
 	docker build -f Dockerfile.$(OSVER) . -t $(DOCKER_BUILD_TAG)
 
 bootstrap_download: download container start boost cmake
 
-bootstrap_git: clone_git container start boost cmake
+bootstrap_git: clone_git container_build container_start boost cmake
 
-start:
+container_start:
 	@mkdir builddir/$(OSVER) ccachedir/$(OSVER); \
 	docker run -d \
 		--env CCACHE_DIR=/home/developer/ccache \
@@ -102,9 +102,9 @@ start:
 		--name $(DC_INSTANCE_NAME) \
 		$(DOCKER_BUILD_TAG)	
 
-stop:
-	docker stop $(DC_INSTANCE_NAME)
+container_kill:
+	docker kill $(DC_INSTANCE_NAME)
 	docker rm $(DC_INSTANCE_NAME)
 
-shell:
+container_shell:
 	docker exec -it --privileged --user developer $(DC_INSTANCE_NAME) bash
